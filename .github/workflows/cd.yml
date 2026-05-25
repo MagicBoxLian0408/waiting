@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ghcr.io/lian2945/magicbox-waiting
+  IMAGE_NAME: ghcr.io/magicboxlian0408/waiting
 
 jobs:
   build-and-push:
