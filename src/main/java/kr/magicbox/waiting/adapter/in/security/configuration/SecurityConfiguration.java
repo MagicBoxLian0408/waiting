@@ -1,9 +1,7 @@
 package kr.magicbox.waiting.adapter.in.security.configuration;
 
 import kr.magicbox.waiting.adapter.in.security.filter.UserInfoExtractFilter;
-import kr.magicbox.waiting.adapter.in.security.properties.TrustedIpProperties;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
@@ -15,7 +13,6 @@ import reactor.core.publisher.Mono;
 
 @Configuration
 @EnableWebFluxSecurity
-@EnableConfigurationProperties(TrustedIpProperties.class)
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
