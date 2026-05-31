@@ -3,7 +3,7 @@ package kr.magicbox.waiting.application.service;
 import kr.magicbox.waiting.application.dto.WaitingStatusResult;
 import kr.magicbox.waiting.application.port.in.GetWaitingStatusUseCase;
 import kr.magicbox.waiting.application.port.out.WaitingQueuePort;
-import kr.magicbox.waiting.domain.constants.WaitingConstants;
+import kr.magicbox.waiting.global.properties.WaitingProperties;
 import kr.magicbox.waiting.domain.vo.ReleaseId;
 import kr.magicbox.waiting.domain.vo.UserId;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 public class GetWaitingStatusService implements GetWaitingStatusUseCase {
 
     private final WaitingQueuePort waitingQueuePort;
+    private final WaitingProperties waitingProperties;
 
     @Override
     public Mono<WaitingStatusResult> getStatus(ReleaseId releaseId, UserId userId) {
@@ -23,7 +24,7 @@ public class GetWaitingStatusService implements GetWaitingStatusUseCase {
                 .map(tuple -> {
                     long rank = tuple.getT1() + 1;
                     long queueSize = tuple.getT2();
-                    long estimatedWait = rank * WaitingConstants.AVG_PURCHASE_SECONDS;
+                    long estimatedWait = (rank - 1) * waitingProperties.getAvgPurchaseSeconds();
                     return WaitingStatusResult.builder()
                             .rank(rank)
                             .queueSize(queueSize)

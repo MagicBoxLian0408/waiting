@@ -5,7 +5,7 @@ import kr.magicbox.waiting.application.dto.EnqueueResult;
 import kr.magicbox.waiting.application.port.in.EnqueueUseCase;
 import kr.magicbox.waiting.application.port.out.ReleaseQueryPort;
 import kr.magicbox.waiting.application.port.out.WaitingQueuePort;
-import kr.magicbox.waiting.domain.constants.WaitingConstants;
+import kr.magicbox.waiting.global.properties.WaitingProperties;
 import kr.magicbox.waiting.domain.exception.AlreadyInQueueException;
 import kr.magicbox.waiting.domain.exception.ReleaseNotOnSaleException;
 import kr.magicbox.waiting.domain.vo.ReleaseId;
@@ -23,6 +23,7 @@ public class EnqueueService implements EnqueueUseCase {
     private final WaitingQueuePort waitingQueuePort;
     private final ReleaseQueryPort releaseQueryPort;
     private final ActiveReleaseRegistry activeReleaseRegistry;
+    private final WaitingProperties waitingProperties;
 
     @Override
     public Mono<EnqueueResult> enqueue(ReleaseId releaseId, UserId userId) {
@@ -53,7 +54,7 @@ public class EnqueueService implements EnqueueUseCase {
                 .map(tuple -> {
                     long rank = tuple.getT1() + 1;
                     long queueSize = tuple.getT2();
-                    long estimatedWait = rank * WaitingConstants.AVG_PURCHASE_SECONDS;
+                    long estimatedWait = (rank - 1) * waitingProperties.getAvgPurchaseSeconds();
                     log.info("[ENQUEUE] 완료 releaseId={} userId={} rank={} queueSize={}", releaseId.value(), userId.value(), rank, queueSize);
                     return EnqueueResult.builder()
                             .rank(rank)

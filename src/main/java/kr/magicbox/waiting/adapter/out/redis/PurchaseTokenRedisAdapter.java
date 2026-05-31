@@ -1,7 +1,7 @@
 package kr.magicbox.waiting.adapter.out.redis;
 
 import kr.magicbox.waiting.application.port.out.PurchaseTokenPort;
-import kr.magicbox.waiting.domain.constants.WaitingConstants;
+import kr.magicbox.waiting.global.properties.WaitingProperties;
 import kr.magicbox.waiting.domain.vo.ReleaseId;
 import kr.magicbox.waiting.domain.vo.UserId;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +17,10 @@ import java.util.UUID;
 public class PurchaseTokenRedisAdapter implements PurchaseTokenPort {
 
     private final ReactiveStringRedisTemplate redisTemplate;
-
-    private static final String TOKEN_KEY_PREFIX = "purchase_token:";
+    private final WaitingProperties waitingProperties;
 
     private String tokenKey(ReleaseId releaseId, UserId userId) {
-        return TOKEN_KEY_PREFIX + releaseId.value() + ":" + userId.value();
+        return waitingProperties.getTokenKeyPrefix() + releaseId.value() + ":" + userId.value();
     }
 
     @Override
@@ -29,7 +28,7 @@ public class PurchaseTokenRedisAdapter implements PurchaseTokenPort {
         String token = UUID.randomUUID().toString();
         String key = tokenKey(releaseId, userId);
         return redisTemplate.opsForValue()
-                .set(key, token, Duration.ofSeconds(WaitingConstants.PURCHASE_TOKEN_TTL_SECONDS))
+                .set(key, token, Duration.ofSeconds(waitingProperties.getPurchaseTokenTtlSeconds()))
                 .thenReturn(token);
     }
 

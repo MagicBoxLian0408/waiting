@@ -1,7 +1,7 @@
 package kr.magicbox.waiting.adapter.out.redis;
 
 import kr.magicbox.waiting.application.port.out.WaitingQueuePort;
-import kr.magicbox.waiting.domain.constants.WaitingConstants;
+import kr.magicbox.waiting.global.properties.WaitingProperties;
 import kr.magicbox.waiting.domain.vo.ReleaseId;
 import kr.magicbox.waiting.domain.vo.UserId;
 import lombok.RequiredArgsConstructor;
@@ -20,15 +20,14 @@ import java.util.List;
 public class WaitingRedisAdapter implements WaitingQueuePort {
 
     private final ReactiveStringRedisTemplate redisTemplate;
+    private final WaitingProperties waitingProperties;
 
-    private static final String QUEUE_KEY_PREFIX = "waiting:";
-    private static final String USER_RELEASE_KEY_PREFIX = "user_release:";
 
     private static final RedisScript<Long> ZADD_NX = RedisScript.of(
             "return redis.call('ZADD', KEYS[1], 'NX', ARGV[1], ARGV[2])", Long.class);
 
     private String queueKey(ReleaseId releaseId) {
-        return QUEUE_KEY_PREFIX + releaseId.value();
+        return waitingProperties.getQueueKeyPrefix() + releaseId.value();
     }
 
     @Override
@@ -41,9 +40,9 @@ public class WaitingRedisAdapter implements WaitingQueuePort {
                 .flatMap(added -> {
                     if (!added) return Mono.just(false);
                     return redisTemplate.opsForValue()
-                            .set(USER_RELEASE_KEY_PREFIX + userId.value(),
+                            .set(waitingProperties.getUserReleaseKeyPrefix() + userId.value(),
                                     String.valueOf(releaseId.value()),
-                                    Duration.ofSeconds(WaitingConstants.PURCHASE_TOKEN_TTL_SECONDS * 2))
+                                    Duration.ofSeconds(waitingProperties.getPurchaseTokenTtlSeconds() * 2))
                             .thenReturn(true);
                 });
     }
@@ -88,7 +87,7 @@ public class WaitingRedisAdapter implements WaitingQueuePort {
     @Override
     public Mono<ReleaseId> findReleaseIdByUserId(UserId userId) {
         return redisTemplate.opsForValue()
-                .get(USER_RELEASE_KEY_PREFIX + userId.value())
+                .get(waitingProperties.getUserReleaseKeyPrefix() + userId.value())
                 .map(releaseIdStr -> ReleaseId.of(Long.parseLong(releaseIdStr)));
     }
 }

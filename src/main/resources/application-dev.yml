@@ -1,3 +1,11 @@
+waiting:
+  avg-purchase-seconds: ${WAITING_AVG_PURCHASE_SECONDS:30}
+  purchase-token-ttl-seconds: ${WAITING_PURCHASE_TOKEN_TTL_SECONDS:300}
+  polling-interval-seconds: ${WAITING_POLLING_INTERVAL_SECONDS:10}
+  queue-key-prefix: ${WAITING_QUEUE_KEY_PREFIX:waiting:}
+  user-release-key-prefix: ${WAITING_USER_RELEASE_KEY_PREFIX:user_release:}
+  token-key-prefix: ${WAITING_TOKEN_KEY_PREFIX:purchase_token:}
+
 spring:
   application:
     name: waiting-dev
