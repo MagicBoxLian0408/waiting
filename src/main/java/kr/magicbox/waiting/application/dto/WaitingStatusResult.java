@@ -6,5 +6,6 @@ import lombok.Builder;
 public record WaitingStatusResult(
         long rank,
         long queueSize,
-        long estimatedWaitSeconds
+        long estimatedWaitSeconds,
+        String purchaseToken
 ) {}
