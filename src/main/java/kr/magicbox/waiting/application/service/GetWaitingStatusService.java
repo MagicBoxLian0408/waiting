@@ -3,6 +3,7 @@ package kr.magicbox.waiting.application.service;
 import kr.magicbox.waiting.application.dto.WaitingStatusResult;
 import kr.magicbox.waiting.application.port.in.GetWaitingStatusUseCase;
 import kr.magicbox.waiting.application.port.out.WaitingQueuePort;
+import kr.magicbox.waiting.domain.exception.NotInQueueException;
 import kr.magicbox.waiting.global.properties.WaitingProperties;
 import kr.magicbox.waiting.domain.vo.ReleaseId;
 import kr.magicbox.waiting.domain.vo.UserId;
@@ -20,6 +21,7 @@ public class GetWaitingStatusService implements GetWaitingStatusUseCase {
     @Override
     public Mono<WaitingStatusResult> getStatus(ReleaseId releaseId, UserId userId) {
         return waitingQueuePort.getRank(releaseId, userId)
+                .switchIfEmpty(Mono.error(new NotInQueueException()))
                 .zipWith(waitingQueuePort.getQueueSize(releaseId))
                 .map(tuple -> {
                     long rank = tuple.getT1() + 1;
