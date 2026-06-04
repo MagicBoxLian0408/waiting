@@ -8,6 +8,7 @@ import kr.magicbox.waiting.application.port.out.ReleaseQueryPort;
 import kr.magicbox.waiting.application.port.out.WaitingQueuePort;
 import kr.magicbox.waiting.domain.vo.ReleaseId;
 import kr.magicbox.waiting.domain.vo.UserId;
+import kr.magicbox.waiting.global.properties.WaitingProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -32,10 +33,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AdmissionScheduler {
 
-    private static final double DECREASE_RATIO = 0.9;
-    private static final double MAX_BATCH_RATIO = 0.2;
-    private static final int INITIAL_BATCH_RATIO_PERCENT = 10;
-
     private final WaitingQueuePort waitingQueuePort;
     private final AdmissionQueuePort admissionQueuePort;
     private final AdmissionRedisAdapter admissionRedisAdapter;
@@ -43,11 +40,12 @@ public class AdmissionScheduler {
     private final PurchaseTokenEventPublishPort purchaseTokenEventPublishPort;
     private final ReleaseQueryPort releaseQueryPort;
     private final ActiveReleaseRegistry activeReleaseRegistry;
+    private final WaitingProperties waitingProperties;
 
     @Scheduled(fixedDelay = 10_000)
     public void admit() {
         Set<ReleaseId> activeIds = activeReleaseRegistry.getActiveReleaseIds();
-        log.info("[SCHEDULER] admit 실행 activeReleases={}", activeIds.stream().map(r -> r.value()).toList());
+        log.info("[SCHEDULER] admit 실행 activeReleases={}", activeIds.stream().map(ReleaseId::value).toList());
         activeIds.forEach(releaseId -> processRelease(releaseId).subscribe());
     }
 
@@ -63,7 +61,7 @@ public class AdmissionScheduler {
                     return admissionRedisAdapter.getBatchSize(releaseId)
                             .flatMap(savedBatchSize -> {
                                 int initialBatchSize = (int) Math.max(1,
-                                        remaining * INITIAL_BATCH_RATIO_PERCENT / 100.0);
+                                        remaining * waitingProperties.getAdmissionInitialBatchRatioPercent() / 100.0);
                                 int currentBatchSize = savedBatchSize > 0 ? savedBatchSize : initialBatchSize;
                                 return admissionQueuePort.getActiveCount(releaseId)
                                         .flatMap(queueDepth -> {
@@ -97,13 +95,15 @@ public class AdmissionScheduler {
         int next;
         if (queueDepth <= alpha) {
             next = currentBatchSize + 1;
-        } else if (queueDepth > beta) {
-            next = (int) Math.floor(currentBatchSize * DECREASE_RATIO);
-        } else {
+        }
+        else if (queueDepth > beta) {
+            next = (int) Math.floor(currentBatchSize * waitingProperties.getAdmissionDecreaseRatio());
+        }
+        else {
             next = currentBatchSize;
         }
 
-        int maxBatchSize = (int) Math.floor(remaining * MAX_BATCH_RATIO);
+        int maxBatchSize = (int) Math.floor(remaining * waitingProperties.getAdmissionMaxBatchRatio());
         return Math.max(1, Math.min(next, maxBatchSize));
     }
 
@@ -118,7 +118,7 @@ public class AdmissionScheduler {
                         return Mono.empty();
                     }
                     log.info("[SCHEDULER] 토큰 발급 대상 releaseId={} users={}", releaseId.value(),
-                            users.stream().map(u -> u.value()).toList());
+                            users.stream().map(UserId::value).toList());
                     return issueTokens(releaseId, users)
                             .then(waitingQueuePort.removeFront(releaseId, users.size()))
                             .then(admissionQueuePort.activate(releaseId, users.size()));

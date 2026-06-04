@@ -60,6 +60,7 @@ public class EnqueueService implements EnqueueUseCase {
                             .rank(rank)
                             .queueSize(queueSize)
                             .estimatedWaitSeconds(estimatedWait)
+                            .pollingIntervalSeconds(waitingProperties.getPollingIntervalSeconds())
                             .build();
                 });
     }

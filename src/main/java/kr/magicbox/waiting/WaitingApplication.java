@@ -2,10 +2,10 @@ package kr.magicbox.waiting;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.kafka.annotation.EnableKafkaRetryTopic;
 
+@EnableKafkaRetryTopic
 @SpringBootApplication
-@EnableScheduling
 public class WaitingApplication {
 
 	public static void main(String[] args) {

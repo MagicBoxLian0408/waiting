@@ -26,4 +26,13 @@ public class WaitingProperties {
 
     /** purchase_token Redis 키 prefix */
     private final String tokenKeyPrefix;
+
+    /** AIMD 혼잡 시 배치 크기 감소 비율 */
+    private final double admissionDecreaseRatio;
+
+    /** 배치 크기 최대 비율 (잔여 수량 대비) */
+    private final double admissionMaxBatchRatio;
+
+    /** 초기 배치 크기 비율 (잔여 수량 대비, %) */
+    private final int admissionInitialBatchRatioPercent;
 }
