@@ -7,13 +7,15 @@ import lombok.Builder;
 public record EnqueueResponse(
         long rank,
         long queueSize,
-        long estimatedWaitSeconds
+        long estimatedWaitSeconds,
+        long pollingIntervalSeconds
 ) {
     public static EnqueueResponse from(EnqueueResult result) {
         return EnqueueResponse.builder()
                 .rank(result.rank())
                 .queueSize(result.queueSize())
                 .estimatedWaitSeconds(result.estimatedWaitSeconds())
+                .pollingIntervalSeconds(result.pollingIntervalSeconds())
                 .build();
     }
 }

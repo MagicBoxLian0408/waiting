@@ -6,5 +6,6 @@ import lombok.Builder;
 public record EnqueueResult(
         long rank,
         long queueSize,
-        long estimatedWaitSeconds
+        long estimatedWaitSeconds,
+        long pollingIntervalSeconds
 ) {}
