@@ -45,7 +45,7 @@ public class AdmissionScheduler {
     @Scheduled(fixedDelay = 10_000)
     public void admit() {
         Set<ReleaseId> activeIds = activeReleaseRegistry.getActiveReleaseIds();
-        log.info("[SCHEDULER] admit 실행 activeReleases={}", activeIds.stream().map(r -> r.value()).toList());
+        log.info("[SCHEDULER] admit 실행 activeReleases={}", activeIds.stream().map(ReleaseId::value).toList());
         activeIds.forEach(releaseId -> processRelease(releaseId).subscribe());
     }
 
@@ -95,9 +95,11 @@ public class AdmissionScheduler {
         int next;
         if (queueDepth <= alpha) {
             next = currentBatchSize + 1;
-        } else if (queueDepth > beta) {
+        }
+        else if (queueDepth > beta) {
             next = (int) Math.floor(currentBatchSize * waitingProperties.getAdmissionDecreaseRatio());
-        } else {
+        }
+        else {
             next = currentBatchSize;
         }
 
@@ -116,7 +118,7 @@ public class AdmissionScheduler {
                         return Mono.empty();
                     }
                     log.info("[SCHEDULER] 토큰 발급 대상 releaseId={} users={}", releaseId.value(),
-                            users.stream().map(u -> u.value()).toList());
+                            users.stream().map(UserId::value).toList());
                     return issueTokens(releaseId, users)
                             .then(waitingQueuePort.removeFront(releaseId, users.size()))
                             .then(admissionQueuePort.activate(releaseId, users.size()));
