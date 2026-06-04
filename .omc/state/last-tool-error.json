@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"git stash && git pull origin main && git stash pop\",\"description\":\"Stash changes, pull main, restore changes\"}",
-  "error": "Exit code 1\nSaved working directory and index state WIP on feat/157: 7d55b23 feat/157 :: sonyflake v0.0.8 업그레이드\nFrom https://github.com/MagicBoxLian0408/waiting\n * branch            main       -> FETCH_HEAD\nUpdating 7d55b23..7f7b9b0\nFast-forward\n .../out/redis/PurchaseTokenRedisAdapter.java       |  9 +++----\n .../adapter/out/redis/WaitingRedisAdapter.java     | 13 +++++-----\n .../application/service/EnqueueService.java        |  5 ++--\n .../service/GetWaitingStatusService.java           |  5 ++...",
-  "timestamp": "2026-06-04T11:39:02.427Z",
-  "retry_count": 1
-}
