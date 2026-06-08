@@ -33,6 +33,8 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: purchase-token-issued:kr.magicbox.waiting.adapter.out.kafka.event.PurchaseTokenIssuedKafkaEvent
     consumer:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
