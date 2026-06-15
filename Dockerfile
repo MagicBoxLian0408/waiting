@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/openjdk/jdk:21-ubuntu
+FROM eclipse-temurin:21-jre-jammy
 ARG JAR_FILE=build/libs/*.jar
 WORKDIR /app
 COPY ${JAR_FILE} app.jar
