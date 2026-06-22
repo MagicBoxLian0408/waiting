@@ -44,3 +44,18 @@ security:
   trusted:
     ips:
       - ${TRUSTED_IP_GATEWAY}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      releaseService:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 20
+        minimum-number-of-calls: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 5
+  timelimiter:
+    instances:
+      releaseService:
+        timeout-duration: 2s
