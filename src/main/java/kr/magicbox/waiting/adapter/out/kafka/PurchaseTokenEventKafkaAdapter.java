@@ -1,6 +1,6 @@
 package kr.magicbox.waiting.adapter.out.kafka;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import kr.magicbox.waiting.adapter.out.kafka.event.PurchaseTokenIssuedKafkaEvent;
 import kr.magicbox.waiting.application.port.out.PurchaseTokenEventPublishPort;
 import kr.magicbox.waiting.domain.vo.ReleaseId;
