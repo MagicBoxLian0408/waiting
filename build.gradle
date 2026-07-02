@@ -1,24 +1,54 @@
 plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.0.3'
+    id 'io.spring.dependency-management' version '1.1.7'
     id 'com.google.protobuf' version '0.9.6'
+}
+
+group = 'kr.magicbox'
+version = '0.0.1'
+description = 'waiting'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://jitpack.io' }
 }
 
 ext {
     springGrpcVersion = "1.0.2"
     springCloudVersion = "2025.1.0"
 }
-version = '0.0.1'
-description = 'waiting'
 
 dependencies {
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    implementation 'com.github.lian2945:sonyflake:v0.0.7'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     implementation 'org.springframework.grpc:spring-grpc-client-spring-boot-starter'
     implementation 'org.springframework.grpc:spring-grpc-server-spring-boot-starter'
     implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-reactor-resilience4j'
     implementation 'org.springframework.kafka:spring-kafka'
-    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     runtimeOnly 'io.asyncer:r2dbc-mysql:1.4.0'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    implementation 'io.grpc:grpc-netty:1.79.0'
+    implementation 'io.grpc:grpc-protobuf:1.79.0'
+    implementation 'io.grpc:grpc-stub:1.79.0'
+    implementation 'io.grpc:grpc-core:1.79.0'
+    implementation 'io.grpc:grpc-api:1.79.0'
+    implementation 'com.google.protobuf:protobuf-java:4.34.0'
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 }
@@ -44,4 +74,13 @@ protobuf {
             grpc {}
         }
     }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    workingDir = rootProject.projectDir
+}
+
+tasks.named('bootRun') {
+    workingDir = rootProject.projectDir
 }
