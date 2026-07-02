@@ -10,7 +10,9 @@ spring:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: purchase-token-issued:kr.magicbox.waiting.adapter.out.kafka.event.PurchaseTokenIssuedKafkaEvent
     consumer:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -19,6 +21,10 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
+  r2dbc:
+    url: r2dbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   grpc:
     server:
       port: ${GRPC_SERVER_PORT}
@@ -33,11 +39,6 @@ spring:
 server:
   port: ${SERVER_PORT}
 
-security:
-  trusted:
-    ips:
-      - 127.0.0.1
-      - 0:0:0:0:0:0:0:1
 
 resilience4j:
   circuitbreaker:
