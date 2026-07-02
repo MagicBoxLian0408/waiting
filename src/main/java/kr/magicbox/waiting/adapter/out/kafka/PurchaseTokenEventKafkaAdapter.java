@@ -1,5 +1,6 @@
 package kr.magicbox.waiting.adapter.out.kafka;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.magicbox.waiting.adapter.out.kafka.event.PurchaseTokenIssuedKafkaEvent;
 import kr.magicbox.waiting.application.port.out.PurchaseTokenEventPublishPort;
 import kr.magicbox.waiting.domain.vo.ReleaseId;
@@ -16,16 +17,16 @@ import reactor.core.scheduler.Schedulers;
 @RequiredArgsConstructor
 public class PurchaseTokenEventKafkaAdapter implements PurchaseTokenEventPublishPort {
 
-    private static final String TOPIC = "sse.purchase-token-issued";
-
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
 
     @Override
     public Mono<Void> publish(ReleaseId releaseId, UserId userId, String purchaseToken) {
         PurchaseTokenIssuedKafkaEvent event = new PurchaseTokenIssuedKafkaEvent(
                 releaseId.value(), userId.value(), purchaseToken
         );
-        return Mono.fromRunnable(() -> kafkaTemplate.send(TOPIC, String.valueOf(userId.value()), event))
+        return Mono.fromCallable(() -> objectMapper.writeValueAsString(event))
+                .flatMap(json -> Mono.fromRunnable(() -> kafkaTemplate.send("sse.purchase-token-issued", String.valueOf(userId.value()), json)))
                 .subscribeOn(Schedulers.boundedElastic())
                 .doOnError(e -> log.error("purchase token 이벤트 발행 실패 releaseId={} userId={}",
                         releaseId.value(), userId.value(), e))
