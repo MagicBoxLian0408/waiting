@@ -2,7 +2,6 @@ package kr.magicbox.waiting.adapter.out.persistence.entity;
 
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -10,8 +9,6 @@ import java.time.Instant;
 
 @Table("waiting.vegas_metric")
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class VegasMetricEntity {
 
     @Id
@@ -21,4 +18,13 @@ public class VegasMetricEntity {
     private int batchSize;
     private long waitingCount;
     private long queueDepth;
+
+    @Builder
+    public VegasMetricEntity(Long releaseId, Instant recordedAt, int batchSize, long waitingCount, long queueDepth) {
+        this.releaseId = releaseId;
+        this.recordedAt = recordedAt;
+        this.batchSize = batchSize;
+        this.waitingCount = waitingCount;
+        this.queueDepth = queueDepth;
+    }
 }
