@@ -7,7 +7,7 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
 
-@Table("waiting.vegas_metric")
+@Table("vegas_metric")
 @NoArgsConstructor
 public class VegasMetricEntity {
 
