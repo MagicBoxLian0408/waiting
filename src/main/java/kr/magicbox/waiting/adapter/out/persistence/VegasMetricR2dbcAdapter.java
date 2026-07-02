@@ -17,8 +17,13 @@ public class VegasMetricR2dbcAdapter implements VegasMetricRepositoryPort {
 
     @Override
     public Mono<Void> record(ReleaseId releaseId, int batchSize, long waitingCount, long queueDepth) {
-        VegasMetricEntity entity = new VegasMetricEntity(
-                releaseId.value(), Instant.now(), batchSize, waitingCount, queueDepth);
+        VegasMetricEntity entity = VegasMetricEntity.builder()
+                .releaseId(releaseId.value())
+                .recordedAt(Instant.now())
+                .batchSize(batchSize)
+                .waitingCount(waitingCount)
+                .queueDepth(queueDepth)
+                .build();
         return vegasMetricR2dbcRepository.save(entity).then();
     }
 }
