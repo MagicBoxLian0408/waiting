@@ -5,6 +5,7 @@ import kr.magicbox.waiting.application.port.out.AdmissionQueuePort;
 import kr.magicbox.waiting.application.port.out.PurchaseTokenEventPublishPort;
 import kr.magicbox.waiting.application.port.out.PurchaseTokenPort;
 import kr.magicbox.waiting.application.port.out.ReleaseQueryPort;
+import kr.magicbox.waiting.application.port.out.VegasMetricRepositoryPort;
 import kr.magicbox.waiting.application.port.out.WaitingQueuePort;
 import kr.magicbox.waiting.domain.vo.ReleaseId;
 import kr.magicbox.waiting.domain.vo.UserId;
@@ -41,6 +42,7 @@ public class AdmissionScheduler {
     private final ReleaseQueryPort releaseQueryPort;
     private final ActiveReleaseRegistry activeReleaseRegistry;
     private final WaitingProperties waitingProperties;
+    private final VegasMetricRepositoryPort vegasMetricRepositoryPort;
 
     @Scheduled(fixedDelay = 10_000)
     public void admit() {
@@ -64,14 +66,16 @@ public class AdmissionScheduler {
                                         remaining * waitingProperties.getAdmissionInitialBatchRatioPercent() / 100.0);
                                 int currentBatchSize = savedBatchSize > 0 ? savedBatchSize : initialBatchSize;
                                 return admissionQueuePort.getActiveCount(releaseId)
-                                        .flatMap(queueDepth -> {
-                                            int nextBatchSize = computeNextBatchSize(
-                                                    currentBatchSize, queueDepth, remaining);
-                                            log.info("[SCHEDULER] AIMD 계산 releaseId={} savedBatchSize={} queueDepth={} nextBatchSize={}",
-                                                    releaseId.value(), savedBatchSize, queueDepth, nextBatchSize);
-                                            return admissionRedisAdapter.saveBatchSize(releaseId, nextBatchSize)
-                                                    .then(issueBatch(releaseId, nextBatchSize, remaining));
-                                        });
+                                        .flatMap(queueDepth -> waitingQueuePort.getQueueSize(releaseId)
+                                                .flatMap(waitingCount -> {
+                                                    int nextBatchSize = computeNextBatchSize(
+                                                            currentBatchSize, queueDepth, remaining);
+                                                    log.info("[SCHEDULER] AIMD 계산 releaseId={} savedBatchSize={} queueDepth={} waitingCount={} nextBatchSize={}",
+                                                            releaseId.value(), savedBatchSize, queueDepth, waitingCount, nextBatchSize);
+                                                    return admissionRedisAdapter.saveBatchSize(releaseId, nextBatchSize)
+                                                            .then(vegasMetricRepositoryPort.record(releaseId, nextBatchSize, waitingCount, queueDepth))
+                                                            .then(issueBatch(releaseId, nextBatchSize, remaining));
+                                                }));
                             });
                 })
                 .doOnError(e -> log.warn("[SCHEDULER] 배치 입장 처리 실패 releaseId={}", releaseId.value(), e))
